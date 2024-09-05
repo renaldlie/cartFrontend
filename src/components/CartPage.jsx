@@ -1,27 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from './CartContext'; // Import the context
+import { useNavigate } from 'react-router-dom';
 
 const CartPage = () => {
-    const { cartItems, removeFromCart } = useCart(); // Use the cart context
+    const navigate = useNavigate();
+    const {temporaryCart, removeFromCart, placeOrder } = useCart(); // Use the cart context
+    const [customerName, setCustomerName] = useState('');
+    const [address, setAddress] = useState('');
+    
+    
 
-    const placeOrder = () => {
-        console.log('Order placed:', cartItems);
-        // Add API call to place the order
+    const handlePlaceOrder = () => {
+        placeOrder(customerName, address, totalAmount).then(() => {
+            navigate("/"); // Redirect to home or confirmation page
+            
+        });
     };
 
-    const totalAmount = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const totalAmount = temporaryCart.reduce((total, item) => total + item.price * item.quantity, 0);
 
     return (
         <div>
             <div>
-            <h2>Order Cart</h2>
-            <p>Customer : 
-            <input type="text" style={{marginLeft:'10px'}} />
-            </p>
+                <h2>Order Cart</h2>
+                <p>
+                    Customer:
+                    <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        style={{ marginLeft: '10px' }}
+                    />
+                </p>
             </div>
-            
-            <p>Address : 
-            <input type="text" style={{marginLeft:'10px'}} />
+
+            <p>
+                Address:
+                <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    style={{ marginLeft: '10px' }}
+                />
             </p>
             <table>
                 <thead>
@@ -35,7 +55,7 @@ const CartPage = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {cartItems.map((item) => (
+                    {temporaryCart.map((item) => (
                         <tr key={item.id}>
                             <td>{item.name}</td>
                             <td>{item.type}</td>
@@ -56,7 +76,7 @@ const CartPage = () => {
                     </tr>
                 </tfoot>
             </table>
-            <button onClick={placeOrder}>Place Order</button>
+            <button onClick={handlePlaceOrder}>Place Order</button>
         </div>
     );
 };

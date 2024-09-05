@@ -6,11 +6,22 @@ const ProductList = () => {
     const [page, setPage] = useState(0);
     const [size, setSize] = useState(5);
     const [totalPages, setTotalPages] = useState(1);
-    const { addToCart } = useCart(); // Use the cart context
+    const { cartId, setCartId, addItemToTemporaryCart, createCart } = useCart(); // Use the cart context
+    
 
     useEffect(() => {
         fetchProducts(page, size);
-    }, [page, size]);
+        // Check if cartId is already stored in localStorage
+        const storedCartId = localStorage.getItem('cartId');
+        if (storedCartId && !cartId) {
+            setCartId(storedCartId);
+        }
+    }, [cartId, page, size]);
+
+    const handleAddToCart = (product) => {
+        addItemToTemporaryCart(product);
+        alert('Product added to cart')
+    };
 
     const fetchProducts = (page, size) => {
         fetch(`http://localhost:8080/api/products?page=${page}&size=${size}`)
@@ -22,14 +33,20 @@ const ProductList = () => {
             .catch(error => console.error('Error fetching products:', error));
     };
 
+    const handleCreateCart = async () => {
+        if (!cartId) {
+            await createCart();
+        } else {
+            alert('Cart already exists with ID: ' + cartId);
+        }
+    };
+
     const handleQuantityChange = (id, event) => {
         const newProducts = products.map(product =>
             product.id === id ? { ...product, quantity: parseInt(event.target.value) } : product
         );
         setProducts(newProducts);
     };
-
-    
 
     const handlePageChange = (newPage) => {
         setPage(newPage);
@@ -82,9 +99,27 @@ const ProductList = () => {
         updateProduct(product.id, updatedProduct);
     };
 
+    const handleResetCartId = () => {
+        resetCartId();
+    };
+
+    const resetCartId = () => {
+        setCartId(3);
+        localStorage.setItem('cartId', 1);
+        
+    };
+    
+
+   
     return (
         <div>
             <h2>Product List</h2>
+            <button onClick={handleCreateCart}>
+                {cartId ? `Cart ID: ${cartId}` : 'Create Cart'}
+            </button>
+            <button onClick={handleResetCartId}>
+                Reset Cart ID to 1
+            </button>
             <div>
                 <label>Items per page: </label>
                 <select value={size} onChange={handleSizeChange}>
@@ -103,7 +138,6 @@ const ProductList = () => {
                         <label>Type: </label>
                         <select disabled>
                             <option>{product.type} </option>
-                            {/* Add other types as necessary */}
                         </select>
                     </div>
                     <div>
@@ -119,7 +153,7 @@ const ProductList = () => {
                         />
                     </div>
                     <div>
-                        <button onClick={() => addToCart(product)}>Add To Cart</button>
+                        <button onClick={() => handleAddToCart(product)}>Add To Cart</button>
                         <button onClick={() => handleUpdate(product)}>Update</button>
                         <button onClick={() => deleteProduct(product.id)}>Delete</button>
                     </div>

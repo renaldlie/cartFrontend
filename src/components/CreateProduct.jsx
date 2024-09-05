@@ -7,7 +7,7 @@ function CreateProduct() {
   const [productPrice, setProductPrice] = useState('');
   const [productType, setProductType] = useState('');
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+ 
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -15,11 +15,11 @@ function CreateProduct() {
 
      // Reset messages
      setMessage('');
-     setError('');
+     
  
      // Validate form fields
     if (!productName || !productPrice || !productType) {
-        setError('All fields are required');
+        alert('All fields are required');
         return;
       }
 
@@ -27,10 +27,10 @@ function CreateProduct() {
       const response = await axios.post('http://localhost:8080/api/products', {
         name: productName,
         price: productPrice,
-        description: productType,
+        type: productType,
       });
 
-      setMessage(`Product created with ID: ${response.data.id}`);
+      alert(`Product created with ID: ${response.data.id}`);
       navigate('/');
     } catch (error) {
       setMessage('Error creating product');
